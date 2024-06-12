@@ -1,6 +1,16 @@
 const rankList = {
-    1: "unranked",
-    2: "unranked",
+    1: {
+        ja: 'アンランク1',
+        en: 'Unranked1',
+        url: '/img/rank/1',
+        img: './img/rank/Unranked_Rank.png',
+    },
+    2: {
+        ja: 'アンランク2',
+        en: 'Unranked2',
+        url: '/img/rank/2',
+        img: './img/rank/Unranked_Rank.png',
+    },
     3: {
         ja: 'アイアン1',
         en: 'Iron 1',

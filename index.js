@@ -52,7 +52,11 @@ async function responseCode(req, res) { // DiscordのOAuth2認証コードを取
 async function responseToken(tokenInfo, res) { // DiscordのOAuth2トークンを取得
     try {
         const { token_type, access_token } = tokenInfo;
+        
         const discordUserInfo = await fetchDiscordUserInfo(token_type, access_token);
+        if (!discordUserInfo) {
+            return res.send('Discord user info not found');
+        }
 
         const riotGames = discordUserInfo.find((connection) => connection.type === "riotgames");
         if (!riotGames) {
@@ -114,25 +118,36 @@ async function getRiotUserInfo(riotGames) { // Riotのユーザー情報を取�
     });
 
     const MMR = await response_MMR.json();
-
-    const responseData = {
-        puuid: accountInfo.data.puuid,
-        gameName: accountInfo.data.gameName,
-        tagLine: accountInfo.data.tagLine,
-        shared: accountInfo.data.region,
-        account_level: accountInfo.data.account_level,
-        currentTia: MMR.data.currenttier,
-        points: MMR.data.ranking_in_tier || 0,
-        currentRank: {
-            ja: rankList[MMR.data.currenttier].ja,
-            en: rankList[MMR.data.currenttier].en,
-        },
-        currentRankImg: `http://localhost:3000`+rankList[MMR.data.currenttier].url,
-        mmr_change_to_last_game: MMR.data.mmr_change_to_last_game,
-        totalPoints: MMR.data.elo
+    if (MMR.data.old) {
+        const responseData = {
+            puuid: accountInfo.data.puuid,
+            gameName: accountInfo.data.name,
+            tagLine: accountInfo.data.tag,
+            shared: accountInfo.data.region,
+            account_level: accountInfo.data.account_level
+        }
+        return responseData;
     }
-
-    return responseData;
+    else {
+        const responseData = {
+            puuid: accountInfo.data.puuid,
+            gameName: accountInfo.data.name,
+            tagLine: accountInfo.data.tag,
+            shared: accountInfo.data.region,
+            account_level: accountInfo.data.account_level,
+            currentTia: MMR.data.currenttier,
+            points: MMR.data.ranking_in_tier || 0,
+            currentRank: {
+                ja: rankList[MMR.data.currenttier].ja,
+                en: rankList[MMR.data.currenttier].en,
+            },
+            currentRankImg: `http://localhost:3000`+rankList[MMR.data.currenttier].url,
+            mmr_change_to_last_game: MMR.data.mmr_change_to_last_game,
+            totalPoints: MMR.data.elo
+        }
+    
+        return responseData;
+    }
 }
 
 // DiscordBOTログインさせてボタンインタラクトした人に自動で其の人のランク付けるみたいなこともできる
